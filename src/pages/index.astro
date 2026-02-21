@@ -1,0 +1,110 @@
+---
+const title = "Greetings from Salamandastron";
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<style>
+			:root {
+				--badger-dark: #1a1a2e;
+				--badger-stripe: #e8e8e0;
+				--accent: #c0392b;
+			}
+
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			body {
+				background-color: var(--badger-dark);
+				color: var(--badger-stripe);
+				font-family: Georgia, "Times New Roman", serif;
+				min-height: 100vh;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				padding: 2rem;
+			}
+
+			main {
+				max-width: 680px;
+				text-align: center;
+			}
+
+			.crest {
+				font-size: 4rem;
+				margin-bottom: 1rem;
+			}
+
+			h1 {
+				font-size: 2.5rem;
+				letter-spacing: 0.04em;
+				margin-bottom: 0.5rem;
+				color: var(--badger-stripe);
+			}
+
+			.subtitle {
+				font-size: 1rem;
+				font-style: italic;
+				color: var(--accent);
+				margin-bottom: 2rem;
+				letter-spacing: 0.08em;
+			}
+
+			p {
+				line-height: 1.8;
+				font-size: 1.1rem;
+				margin-bottom: 1.25rem;
+				color: #c8c8c0;
+			}
+
+			.byline {
+				margin-top: 2.5rem;
+				font-size: 0.85rem;
+				color: #888;
+				letter-spacing: 0.05em;
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<div class="crest">🦡</div>
+			<h1>Salamandastron</h1>
+			<p class="subtitle">Mountain Fortress of the Badger Lords</p>
+
+			<p>
+				Deep within the ancient volcano of Salamandastron, where the forge fires never
+				go cold and the Long Patrol hares drill at the crack of dawn, the Badger Lords
+				have ruled since time before memory. They are not rulers by choice — the
+				mountain <em>calls</em> to them, across plains and oceans, in visions only
+				badgers can see.
+			</p>
+
+			<p>
+				Lord Urthstripe the Strong once said: <em>"The mountain does not belong to me.
+				I belong to the mountain."</em> He said this immediately before hurling a
+				boulder the size of a hay cart at a vermin horde, which rather undercut the
+				philosophical tone.
+			</p>
+
+			<p>
+				The hares of the Long Patrol disagree about many things — scones vs.
+				crumpets, the correct number of medals on a dress uniform, whether the word
+				"chap" can be applied to a badger — but on one matter they are unanimous:
+				<strong>Salamandastron stands</strong>. It has always stood. It always will.
+			</p>
+
+			<p class="byline">
+				— This page is a work in progress. More soon. —
+			</p>
+		</main>
+	</body>
+</html>
