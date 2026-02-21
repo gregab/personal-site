@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/quid",
+      "destination": "https://quid-khaki.vercel.app/quid"
+    },
+    {
       "source": "/quid/:path*",
       "destination": "https://quid-khaki.vercel.app/quid/:path*"
     }
