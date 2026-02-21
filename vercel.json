@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/quid/:path*",
-      "destination": "https://quid-khaki.vercel.app/quid/:path*"
+      "destination": "https://quid-khaki.vercel.app/:path*"
     }
   ]
 }
