@@ -1,12 +1,12 @@
 {
   "rewrites": [
     {
-      "source": "/quid",
-      "destination": "https://quid-khaki.vercel.app/quid"
+      "source": "/aviary",
+      "destination": "https://quid-khaki.vercel.app/aviary"
     },
     {
-      "source": "/quid/:path*",
-      "destination": "https://quid-khaki.vercel.app/quid/:path*"
+      "source": "/aviary/:path*",
+      "destination": "https://quid-khaki.vercel.app/aviary/:path*"
     }
   ]
 }
