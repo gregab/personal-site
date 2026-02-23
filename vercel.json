@@ -1,12 +1,14 @@
 {
-  "rewrites": [
-    {
-      "source": "/aviary",
-      "destination": "https://quid-khaki.vercel.app/aviary"
-    },
+  "redirects": [
     {
       "source": "/aviary/:path*",
-      "destination": "https://quid-khaki.vercel.app/aviary/:path*"
+      "destination": "https://aviary.gregbigelow.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/aviary",
+      "destination": "https://aviary.gregbigelow.com",
+      "permanent": true
     }
   ]
 }
