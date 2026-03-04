@@ -1,0 +1,680 @@
+---
+const title = "Cam's Block Escape!";
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<title>{title}</title>
+		<style>
+			* { margin: 0; padding: 0; box-sizing: border-box; }
+			body {
+				background: #1a1a2e;
+				color: #fff;
+				font-family: 'Segoe UI', system-ui, sans-serif;
+				min-height: 100vh;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				overflow: hidden;
+				touch-action: none;
+				user-select: none;
+				-webkit-user-select: none;
+			}
+			header {
+				text-align: center;
+				padding: 12px 16px 4px;
+				width: 100%;
+			}
+			header h1 {
+				font-size: 1.5rem;
+				background: linear-gradient(135deg, #f093fb, #f5576c, #fda085);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+			}
+			.level-info {
+				font-size: 0.95rem;
+				color: #aaa;
+				margin-top: 2px;
+			}
+			.moves-display {
+				font-size: 0.85rem;
+				color: #888;
+				margin-top: 2px;
+			}
+			#game-area {
+				position: relative;
+				margin: 8px auto;
+				border: 3px solid #333;
+				border-radius: 12px;
+				background: #16213e;
+				overflow: visible;
+			}
+			.block {
+				position: absolute;
+				border-radius: 10px;
+				cursor: grab;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 1.4rem;
+				font-weight: bold;
+				transition: box-shadow 0.15s;
+				z-index: 1;
+			}
+			.block:active { cursor: grabbing; }
+			.block.hero {
+				background: linear-gradient(135deg, #f5576c, #ff6b6b);
+				box-shadow: 0 0 12px rgba(245,87,108,0.5);
+				z-index: 2;
+			}
+			.block.hero::after {
+				content: '⭐';
+				font-size: 1.3rem;
+			}
+			.exit-marker {
+				position: absolute;
+				background: linear-gradient(180deg, rgba(245,87,108,0.6), rgba(245,87,108,0));
+				z-index: 0;
+				display: flex;
+				align-items: flex-start;
+				justify-content: center;
+				padding-top: 4px;
+				font-size: 1.2rem;
+				border-radius: 6px;
+			}
+			.btn {
+				padding: 10px 24px;
+				border: none;
+				border-radius: 25px;
+				font-size: 1rem;
+				font-weight: 600;
+				cursor: pointer;
+				margin: 4px;
+				transition: transform 0.1s;
+			}
+			.btn:active { transform: scale(0.95); }
+			.btn-primary {
+				background: linear-gradient(135deg, #667eea, #764ba2);
+				color: #fff;
+			}
+			.btn-reset {
+				background: #333;
+				color: #ccc;
+			}
+			.controls {
+				display: flex;
+				gap: 8px;
+				margin-top: 8px;
+				flex-wrap: wrap;
+				justify-content: center;
+			}
+			#overlay {
+				display: none;
+				position: fixed;
+				inset: 0;
+				background: rgba(0,0,0,0.85);
+				z-index: 100;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+				padding: 20px;
+			}
+			#overlay.show { display: flex; }
+			#overlay h2 {
+				font-size: 2rem;
+				margin-bottom: 8px;
+			}
+			#overlay p {
+				font-size: 1.1rem;
+				color: #ccc;
+				margin-bottom: 16px;
+			}
+			.confetti {
+				position: fixed;
+				width: 10px;
+				height: 10px;
+				border-radius: 2px;
+				z-index: 101;
+				pointer-events: none;
+			}
+			#welcome {
+				display: flex;
+				position: fixed;
+				inset: 0;
+				background: rgba(0,0,0,0.92);
+				z-index: 200;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+				padding: 20px;
+			}
+			#welcome.hide { display: none; }
+			#welcome h2 {
+				font-size: 2.2rem;
+				margin-bottom: 12px;
+				background: linear-gradient(135deg, #f093fb, #f5576c, #fda085);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+			}
+			#welcome p {
+				font-size: 1.1rem;
+				color: #ccc;
+				max-width: 340px;
+				line-height: 1.6;
+				margin-bottom: 20px;
+			}
+			.stars { font-size: 1.8rem; letter-spacing: 4px; margin: 6px 0; }
+			.grid-line {
+				position: absolute;
+				background: rgba(255,255,255,0.04);
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<h1>Cam's Block Escape!</h1>
+			<div class="level-info" id="level-info">Level 1 of 8</div>
+			<div class="moves-display" id="moves-display">Moves: 0</div>
+		</header>
+		<div id="game-area"></div>
+		<div class="controls">
+			<button class="btn btn-reset" id="btn-reset" onclick="resetLevel()">Reset</button>
+			<button class="btn btn-primary" id="btn-levels" onclick="showLevelSelect()">Levels</button>
+		</div>
+
+		<div id="welcome">
+			<h2>Hi Cam! 👋</h2>
+			<p>Slide the blocks out of the way so the ⭐ block can escape through the exit!</p>
+			<p style="font-size:0.95rem; color:#aaa;">Drag blocks to move them. They only slide in one direction!</p>
+			<button class="btn btn-primary" onclick="startGame()" style="font-size:1.2rem; padding: 14px 40px;">Let's Play!</button>
+		</div>
+
+		<div id="overlay">
+			<h2 id="overlay-title"></h2>
+			<div class="stars" id="overlay-stars"></div>
+			<p id="overlay-msg"></p>
+			<div id="overlay-buttons"></div>
+		</div>
+
+		<script is:inline>
+		// --- GAME CONFIG ---
+		const CELL = 58;
+		const GAP = 3;
+		const COLS = 6;
+		const ROWS = 6;
+		const BLOCK_COLORS = [
+			'linear-gradient(135deg,#667eea,#764ba2)',
+			'linear-gradient(135deg,#43e97b,#38f9d7)',
+			'linear-gradient(135deg,#fa709a,#fee140)',
+			'linear-gradient(135deg,#a18cd1,#fbc2eb)',
+			'linear-gradient(135deg,#fccb90,#d57eeb)',
+			'linear-gradient(135deg,#4facfe,#00f2fe)',
+			'linear-gradient(135deg,#f6d365,#fda085)',
+			'linear-gradient(135deg,#89f7fe,#66a6ff)',
+			'linear-gradient(135deg,#fddb92,#d1fdff)',
+			'linear-gradient(135deg,#c1dfc4,#deecdd)',
+		];
+
+		// Levels: each block = [col, row, width, height, isHero]
+		// Exit is always on the right side for the hero row
+		const LEVELS = [
+			{ // Level 1 - Tutorial
+				name: "Getting Started",
+				blocks: [
+					[0, 2, 2, 1, true],
+					[3, 0, 1, 2, false],
+					[4, 1, 1, 3, false],
+				],
+				exitRow: 2,
+			},
+			{ // Level 2
+				name: "Two Blockers",
+				blocks: [
+					[0, 2, 2, 1, true],
+					[3, 1, 1, 3, false],
+					[5, 0, 1, 2, false],
+					[2, 4, 2, 1, false],
+				],
+				exitRow: 2,
+			},
+			{ // Level 3
+				name: "Getting Trickier",
+				blocks: [
+					[1, 2, 2, 1, true],
+					[0, 0, 1, 2, false],
+					[3, 0, 1, 2, false],
+					[4, 1, 1, 3, false],
+					[0, 4, 2, 1, false],
+					[2, 3, 1, 2, false],
+				],
+				exitRow: 2,
+			},
+			{ // Level 4
+				name: "Traffic Jam",
+				blocks: [
+					[0, 2, 2, 1, true],
+					[2, 0, 1, 2, false],
+					[3, 0, 2, 1, false],
+					[4, 1, 1, 2, false],
+					[5, 2, 1, 2, false],
+					[2, 3, 1, 2, false],
+					[3, 4, 2, 1, false],
+					[0, 5, 3, 1, false],
+				],
+				exitRow: 2,
+			},
+			{ // Level 5
+				name: "Think Ahead",
+				blocks: [
+					[1, 2, 2, 1, true],
+					[0, 0, 2, 1, false],
+					[3, 0, 1, 3, false],
+					[5, 0, 1, 2, false],
+					[4, 2, 1, 2, false],
+					[0, 3, 1, 2, false],
+					[1, 4, 2, 1, false],
+					[3, 4, 1, 2, false],
+					[5, 3, 1, 3, false],
+				],
+				exitRow: 2,
+			},
+			{ // Level 6
+				name: "Zigzag",
+				blocks: [
+					[0, 2, 2, 1, true],
+					[2, 0, 1, 2, false],
+					[3, 1, 1, 2, false],
+					[4, 0, 1, 3, false],
+					[5, 1, 1, 2, false],
+					[2, 3, 2, 1, false],
+					[0, 4, 1, 2, false],
+					[1, 3, 1, 2, false],
+					[4, 4, 2, 1, false],
+					[3, 5, 1, 1, false],
+				],
+				exitRow: 2,
+			},
+			{ // Level 7
+				name: "Rush Hour",
+				blocks: [
+					[0, 2, 2, 1, true],
+					[2, 0, 1, 2, false],
+					[3, 0, 1, 3, false],
+					[5, 0, 1, 2, false],
+					[4, 2, 1, 2, false],
+					[2, 3, 2, 1, false],
+					[5, 3, 1, 2, false],
+					[0, 4, 1, 2, false],
+					[1, 4, 2, 1, false],
+					[3, 4, 1, 2, false],
+					[4, 5, 2, 1, false],
+				],
+				exitRow: 2,
+			},
+			{ // Level 8
+				name: "Master Puzzle",
+				blocks: [
+					[0, 2, 2, 1, true],
+					[0, 0, 1, 2, false],
+					[1, 0, 2, 1, false],
+					[3, 0, 1, 2, false],
+					[4, 0, 1, 2, false],
+					[2, 1, 1, 2, false],
+					[5, 1, 1, 2, false],
+					[3, 3, 1, 2, false],
+					[4, 2, 1, 2, false],
+					[0, 4, 2, 1, false],
+					[2, 4, 1, 2, false],
+					[4, 4, 2, 1, false],
+					[5, 4, 1, 2, false],
+				],
+				exitRow: 2,
+			},
+		];
+
+		// --- STATE ---
+		let currentLevel = 0;
+		let blocks = [];
+		let moves = 0;
+		let dragging = null;
+		let dragStartX = 0, dragStartY = 0;
+		let blockStartX = 0, blockStartY = 0;
+
+		const gameArea = document.getElementById('game-area');
+		const gridW = COLS * (CELL + GAP) + GAP;
+		const gridH = ROWS * (CELL + GAP) + GAP;
+		gameArea.style.width = gridW + 'px';
+		gameArea.style.height = gridH + 'px';
+
+		// Scale game to fit viewport
+		function scaleGame() {
+			const vw = window.innerWidth;
+			const vh = window.innerHeight;
+			const headerH = 80;
+			const controlsH = 60;
+			const available = Math.min(vw - 24, vh - headerH - controlsH - 24);
+			const scale = Math.min(1.2, available / gridW);
+			gameArea.style.transform = 'scale(' + scale + ')';
+			gameArea.style.transformOrigin = 'top center';
+		}
+		scaleGame();
+		window.addEventListener('resize', scaleGame);
+
+		function cellToPos(c) { return GAP + c * (CELL + GAP); }
+
+		function drawGrid() {
+			const lines = gameArea.querySelectorAll('.grid-line');
+			lines.forEach(l => l.remove());
+			for (let c = 1; c < COLS; c++) {
+				const l = document.createElement('div');
+				l.className = 'grid-line';
+				l.style.cssText = 'left:' + (cellToPos(c) - 2) + 'px;top:0;width:1px;height:100%;';
+				gameArea.appendChild(l);
+			}
+			for (let r = 1; r < ROWS; r++) {
+				const l = document.createElement('div');
+				l.className = 'grid-line';
+				l.style.cssText = 'top:' + (cellToPos(r) - 2) + 'px;left:0;height:1px;width:100%;';
+				gameArea.appendChild(l);
+			}
+		}
+
+		function loadLevel(idx) {
+			currentLevel = idx;
+			const level = LEVELS[idx];
+			moves = 0;
+			document.getElementById('moves-display').textContent = 'Moves: 0';
+			document.getElementById('level-info').textContent =
+				'Level ' + (idx + 1) + ' of ' + LEVELS.length + ' — ' + level.name;
+			// Clear
+			gameArea.innerHTML = '';
+			blocks = [];
+			drawGrid();
+
+			// Draw exit marker
+			const exitMarker = document.createElement('div');
+			exitMarker.className = 'exit-marker';
+			const ey = cellToPos(level.exitRow);
+			exitMarker.style.cssText = 'right:-18px;top:' + ey + 'px;width:18px;height:' + CELL + 'px;';
+			exitMarker.textContent = '→';
+			gameArea.appendChild(exitMarker);
+
+			// Open the right border at exit
+			gameArea.style.borderRight = '3px solid #333';
+			gameArea.style.clipPath = 'none';
+
+			// Create blocks
+			level.blocks.forEach((b, i) => {
+				const [col, row, w, h, isHero] = b;
+				const el = document.createElement('div');
+				el.className = 'block' + (isHero ? ' hero' : '');
+				if (!isHero) {
+					el.style.background = BLOCK_COLORS[i % BLOCK_COLORS.length];
+					el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+				}
+				const px = cellToPos(col);
+				const py = cellToPos(row);
+				const pw = w * (CELL + GAP) - GAP;
+				const ph = h * (CELL + GAP) - GAP;
+				el.style.left = px + 'px';
+				el.style.top = py + 'px';
+				el.style.width = pw + 'px';
+				el.style.height = ph + 'px';
+				el.dataset.idx = i;
+				gameArea.appendChild(el);
+				blocks.push({
+					el, col, row, w, h, isHero,
+					horizontal: w > h || (w === 1 && h === 1 && isHero),
+				});
+				// For 1x1 non-hero, allow both — but in Rush Hour rules, all blocks
+				// move in one axis. 1x1 = treat as horizontal by convention unless it's a
+				// non-hero single block. We'll make 1x1 blocks movable in both directions.
+			});
+
+			setupTouch();
+		}
+
+		function getOccupied(skipIdx) {
+			const grid = [];
+			for (let r = 0; r < ROWS; r++) {
+				grid[r] = [];
+				for (let c = 0; c < COLS; c++) grid[r][c] = false;
+			}
+			blocks.forEach((b, i) => {
+				if (i === skipIdx) return;
+				for (let dr = 0; dr < b.h; dr++)
+					for (let dc = 0; dc < b.w; dc++)
+						if (b.row + dr < ROWS && b.col + dc < COLS)
+							grid[b.row + dr][b.col + dc] = true;
+			});
+			return grid;
+		}
+
+		function getRange(idx) {
+			const b = blocks[idx];
+			const grid = getOccupied(idx);
+			let minPos, maxPos;
+
+			if (b.horizontal) {
+				// Find leftmost position
+				let minC = b.col;
+				while (minC > 0) {
+					let ok = true;
+					for (let dr = 0; dr < b.h; dr++) if (grid[b.row + dr][minC - 1]) ok = false;
+					if (!ok) break;
+					minC--;
+				}
+				// Find rightmost
+				let maxC = b.col;
+				while (maxC + b.w < COLS) {
+					let ok = true;
+					for (let dr = 0; dr < b.h; dr++) if (grid[b.row + dr][maxC + b.w]) ok = false;
+					if (!ok) break;
+					maxC++;
+				}
+				// Hero can escape off right edge
+				if (b.isHero && maxC + b.w >= COLS) maxC = COLS;
+				minPos = cellToPos(minC);
+				maxPos = cellToPos(maxC);
+				if (b.isHero && maxC >= COLS) maxPos = cellToPos(COLS) + CELL;
+				return { axis: 'x', min: minPos, max: maxPos };
+			} else {
+				let minR = b.row;
+				while (minR > 0) {
+					let ok = true;
+					for (let dc = 0; dc < b.w; dc++) if (grid[minR - 1][b.col + dc]) ok = false;
+					if (!ok) break;
+					minR--;
+				}
+				let maxR = b.row;
+				while (maxR + b.h < ROWS) {
+					let ok = true;
+					for (let dc = 0; dc < b.w; dc++) if (grid[maxR + b.h][b.col + dc]) ok = false;
+					if (!ok) break;
+					maxR++;
+				}
+				minPos = cellToPos(minR);
+				maxPos = cellToPos(maxR);
+				return { axis: 'y', min: minPos, max: maxPos };
+			}
+		}
+
+		function snapToCell(pos) {
+			// Find closest cell position
+			let best = 0, bestDist = 99999;
+			for (let c = 0; c <= COLS; c++) {
+				const cp = cellToPos(c);
+				const d = Math.abs(pos - cp);
+				if (d < bestDist) { bestDist = d; best = c; }
+			}
+			return best;
+		}
+
+		function setupTouch() {
+			const onStart = (e) => {
+				const t = e.touches ? e.touches[0] : e;
+				const el = t.target.closest('.block');
+				if (!el) return;
+				e.preventDefault();
+				const idx = parseInt(el.dataset.idx);
+				const range = getRange(idx);
+				dragging = { idx, range };
+				dragStartX = t.clientX;
+				dragStartY = t.clientY;
+				blockStartX = parseInt(el.style.left);
+				blockStartY = parseInt(el.style.top);
+				el.style.zIndex = 10;
+				el.style.transition = 'none';
+			};
+
+			const onMove = (e) => {
+				if (!dragging) return;
+				e.preventDefault();
+				const t = e.touches ? e.touches[0] : e;
+				const dx = t.clientX - dragStartX;
+				const dy = t.clientY - dragStartY;
+				const el = blocks[dragging.idx].el;
+				const range = dragging.range;
+				const scale = gameArea.getBoundingClientRect().width / gridW;
+
+				if (range.axis === 'x') {
+					let nx = blockStartX + dx / scale;
+					nx = Math.max(range.min, Math.min(range.max, nx));
+					el.style.left = nx + 'px';
+				} else {
+					let ny = blockStartY + dy / scale;
+					ny = Math.max(range.min, Math.min(range.max, ny));
+					el.style.top = ny + 'px';
+				}
+			};
+
+			const onEnd = (e) => {
+				if (!dragging) return;
+				const b = blocks[dragging.idx];
+				const el = b.el;
+				const range = dragging.range;
+				el.style.transition = 'left 0.12s, top 0.12s';
+
+				if (range.axis === 'x') {
+					const curX = parseInt(el.style.left);
+					// Check if hero escaped
+					if (b.isHero && curX > cellToPos(COLS - 1)) {
+						el.style.left = (gridW + 20) + 'px';
+						dragging = null;
+						setTimeout(onWin, 300);
+						return;
+					}
+					const newCol = snapToCell(curX);
+					if (newCol !== b.col) moves++;
+					b.col = newCol;
+					el.style.left = cellToPos(newCol) + 'px';
+				} else {
+					const curY = parseInt(el.style.top);
+					const newRow = snapToCell(curY);
+					if (newRow !== b.row) moves++;
+					b.row = newRow;
+					el.style.top = cellToPos(newRow) + 'px';
+				}
+
+				el.style.zIndex = b.isHero ? 2 : 1;
+				document.getElementById('moves-display').textContent = 'Moves: ' + moves;
+				dragging = null;
+			};
+
+			gameArea.addEventListener('mousedown', onStart);
+			gameArea.addEventListener('touchstart', onStart, { passive: false });
+			window.addEventListener('mousemove', onMove);
+			window.addEventListener('touchmove', onMove, { passive: false });
+			window.addEventListener('mouseup', onEnd);
+			window.addEventListener('touchend', onEnd);
+		}
+
+		function onWin() {
+			const stars = moves <= 5 ? 3 : moves <= 10 ? 2 : 1;
+			const starStr = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+			const isLast = currentLevel >= LEVELS.length - 1;
+
+			const overlay = document.getElementById('overlay');
+			document.getElementById('overlay-title').textContent =
+				isLast ? '🎉 You Beat ALL the Puzzles, Cam! 🎉' : '🎉 Amazing, Cam! 🎉';
+			document.getElementById('overlay-stars').textContent = starStr;
+			document.getElementById('overlay-msg').textContent =
+				isLast
+					? 'You are a puzzle MASTER! Solved it in ' + moves + ' moves!'
+					: 'You solved it in ' + moves + ' moves!';
+
+			let btns = '';
+			if (!isLast) {
+				btns += '<button class="btn btn-primary" onclick="nextLevel()">Next Level →</button>';
+			} else {
+				btns += '<button class="btn btn-primary" onclick="loadLevel(0);hideOverlay()">Play Again!</button>';
+			}
+			btns += '<button class="btn btn-reset" onclick="showLevelSelect()">Pick Level</button>';
+			document.getElementById('overlay-buttons').innerHTML = btns;
+			overlay.classList.add('show');
+			spawnConfetti();
+		}
+
+		function hideOverlay() {
+			document.getElementById('overlay').classList.remove('show');
+		}
+
+		function nextLevel() {
+			hideOverlay();
+			if (currentLevel < LEVELS.length - 1) loadLevel(currentLevel + 1);
+		}
+
+		function resetLevel() { loadLevel(currentLevel); }
+
+		function showLevelSelect() {
+			hideOverlay();
+			const overlay = document.getElementById('overlay');
+			document.getElementById('overlay-title').textContent = 'Pick a Level!';
+			document.getElementById('overlay-stars').textContent = '';
+			document.getElementById('overlay-msg').textContent = '';
+			let btns = '';
+			LEVELS.forEach((l, i) => {
+				btns += '<button class="btn btn-primary" style="margin:4px;min-width:160px" onclick="loadLevel(' + i + ');hideOverlay()">' +
+					'Level ' + (i + 1) + ': ' + l.name + '</button>';
+			});
+			document.getElementById('overlay-buttons').innerHTML = btns;
+			overlay.classList.add('show');
+		}
+
+		function startGame() {
+			document.getElementById('welcome').classList.add('hide');
+			loadLevel(0);
+		}
+
+		function spawnConfetti() {
+			const colors = ['#f5576c','#667eea','#43e97b','#fda085','#fa709a','#4facfe','#f6d365','#a18cd1'];
+			for (let i = 0; i < 60; i++) {
+				const c = document.createElement('div');
+				c.className = 'confetti';
+				c.style.background = colors[Math.floor(Math.random() * colors.length)];
+				c.style.left = Math.random() * 100 + 'vw';
+				c.style.top = '-10px';
+				c.style.width = (6 + Math.random() * 8) + 'px';
+				c.style.height = (6 + Math.random() * 8) + 'px';
+				c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+				document.body.appendChild(c);
+				const dur = 1500 + Math.random() * 2000;
+				const drift = (Math.random() - 0.5) * 200;
+				c.animate([
+					{ transform: 'translateY(0) translateX(0) rotate(0deg)', opacity: 1 },
+					{ transform: 'translateY(' + (window.innerHeight + 20) + 'px) translateX(' + drift + 'px) rotate(' + (360 + Math.random()*360) + 'deg)', opacity: 0 }
+				], { duration: dur, easing: 'ease-out' });
+				setTimeout(() => c.remove(), dur);
+			}
+		}
+
+		// Pre-load first level in background (hidden behind welcome screen)
+		loadLevel(0);
+		</script>
+	</body>
+</html>
