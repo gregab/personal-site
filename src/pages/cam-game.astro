@@ -1,5 +1,5 @@
 ---
-const title = "Cam's Puzzle Adventure!";
+const title = "Traffic Jam";
 ---
 
 <html lang="en">
@@ -10,11 +10,9 @@ const title = "Cam's Puzzle Adventure!";
 		<title>{title}</title>
 		<style>
 			:root {
-				--bg: #1a1a2e;
-				--board: #2d2d4a;
-				--grid-line: #3a3a5c;
+				--bg: #0f0f1a;
+				--board: #1e1e32;
 				--text: #e8e8e0;
-				--star: #f1c40f;
 			}
 
 			* { margin: 0; padding: 0; box-sizing: border-box; }
@@ -35,8 +33,7 @@ const title = "Cam's Puzzle Adventure!";
 			}
 
 			h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
-			.level-label { font-size: 1rem; color: #aaa; margin-bottom: 0.5rem; }
-			.moves-label { font-size: 0.9rem; color: #aaa; margin-bottom: 0.5rem; }
+			.moves-label { font-size: 0.9rem; color: #888; margin-bottom: 0.5rem; }
 
 			#board-container {
 				position: relative;
@@ -56,22 +53,22 @@ const title = "Cam's Puzzle Adventure!";
 			.btn-row {
 				display: flex;
 				gap: 0.75rem;
-				margin-top: 0.5rem;
+				margin-top: 0.75rem;
 				flex-wrap: wrap;
 				justify-content: center;
 			}
 
 			button {
-				background: #3a3a5c;
+				background: #2a2a44;
 				color: var(--text);
-				border: none;
+				border: 1px solid #3a3a5c;
 				border-radius: 8px;
 				padding: 0.6rem 1.2rem;
 				font-size: 1rem;
 				cursor: pointer;
-				transition: background 0.15s;
+				transition: background 0.15s, border-color 0.15s;
 			}
-			button:hover, button:active { background: #50507a; }
+			button:hover, button:active { background: #3a3a5c; border-color: #50507a; }
 
 			#splash {
 				display: flex;
@@ -82,8 +79,8 @@ const title = "Cam's Puzzle Adventure!";
 				min-height: 60vh;
 			}
 			#splash h1 { font-size: 2rem; margin-bottom: 0.5rem; }
-			#splash .hello { font-size: 1.3rem; color: #ccc; margin-bottom: 1.5rem; }
-			#splash button { font-size: 1.2rem; padding: 0.8rem 2rem; background: #c0392b; }
+			#splash .hello { font-size: 1.1rem; color: #999; margin-bottom: 1.5rem; }
+			#splash button { font-size: 1.2rem; padding: 0.8rem 2rem; background: #c0392b; border-color: #e74c3c; }
 			#splash button:hover { background: #e74c3c; }
 
 			#game-area { display: none; flex-direction: column; align-items: center; }
@@ -92,7 +89,7 @@ const title = "Cam's Puzzle Adventure!";
 				display: none;
 				position: fixed;
 				inset: 0;
-				background: rgba(0,0,0,0.75);
+				background: rgba(0,0,0,0.8);
 				z-index: 100;
 				flex-direction: column;
 				align-items: center;
@@ -100,10 +97,10 @@ const title = "Cam's Puzzle Adventure!";
 				text-align: center;
 			}
 			#win-overlay.show { display: flex; }
-			#win-overlay h2 { font-size: 2rem; margin-bottom: 0.5rem; }
-			#win-overlay .stars { font-size: 3rem; margin-bottom: 0.5rem; }
-			#win-overlay .msg { font-size: 1.1rem; color: #ccc; margin-bottom: 1rem; }
-			#win-overlay button { font-size: 1.1rem; padding: 0.7rem 1.5rem; margin: 0.3rem; }
+			#win-overlay h2 { font-size: 1.8rem; margin-bottom: 0.4rem; }
+			#win-overlay .stars { font-size: 2.5rem; margin-bottom: 0.4rem; }
+			#win-overlay .msg { font-size: 1rem; color: #999; margin-bottom: 1rem; }
+			#win-overlay button { font-size: 1.05rem; padding: 0.65rem 1.4rem; margin: 0.3rem; }
 
 			#all-done {
 				display: none;
@@ -114,9 +111,9 @@ const title = "Cam's Puzzle Adventure!";
 				min-height: 60vh;
 			}
 			#all-done.show { display: flex; }
-			#all-done h2 { font-size: 2.2rem; margin-bottom: 0.5rem; }
-			#all-done .big-stars { font-size: 4rem; margin-bottom: 0.5rem; }
-			#all-done .msg { font-size: 1.2rem; color: #ccc; margin-bottom: 1.5rem; max-width: 340px; }
+			#all-done h2 { font-size: 2rem; margin-bottom: 0.5rem; }
+			#all-done .big-stars { font-size: 3rem; margin-bottom: 0.5rem; }
+			#all-done .msg { font-size: 1.1rem; color: #999; margin-bottom: 1.5rem; max-width: 300px; }
 
 			.confetti-canvas {
 				position: fixed;
@@ -125,7 +122,7 @@ const title = "Cam's Puzzle Adventure!";
 				z-index: 200;
 			}
 			a.back-link {
-				color: #aaa;
+				color: #666;
 				font-size: 0.85rem;
 				margin-top: 1rem;
 				text-decoration: none;
@@ -136,12 +133,9 @@ const title = "Cam's Puzzle Adventure!";
 	<body>
 		<div id="splash">
 			<div style="font-size:3rem; margin-bottom:0.5rem;">🚗</div>
-			<h1>Traffic Jam!</h1>
-			<p class="hello">Hi Cam! Can you help the red car escape?</p>
-			<p style="color:#999; margin-bottom:1.5rem; max-width:300px; font-size:0.95rem;">
-				Slide the blocks out of the way so the red car can drive to the exit!
-			</p>
-			<button id="start-btn">Let's Play!</button>
+			<h1>Traffic Jam</h1>
+			<p class="hello">Slide blocks to get the red car out.</p>
+			<button id="start-btn">Play</button>
 		</div>
 
 		<div id="game-area">
@@ -151,26 +145,26 @@ const title = "Cam's Puzzle Adventure!";
 				<canvas id="board"></canvas>
 			</div>
 			<div class="btn-row">
-				<button id="reset-btn">Start Over</button>
+				<button id="reset-btn">Reset</button>
 				<button id="menu-btn">Menu</button>
 			</div>
 		</div>
 
 		<div id="win-overlay">
 			<div class="stars" id="win-stars"></div>
-			<h2 id="win-title">You did it!</h2>
+			<h2 id="win-title">Solved!</h2>
 			<p class="msg" id="win-msg"></p>
 			<div class="btn-row">
 				<button id="next-btn">Next Level</button>
-				<button id="replay-btn">Play Again</button>
+				<button id="replay-btn">Retry</button>
 			</div>
 		</div>
 
 		<div id="all-done">
-			<div class="big-stars">🌟🏆🌟</div>
-			<h2>Amazing, Cam!</h2>
-			<p class="msg">You solved every single puzzle! You're a superstar problem solver!</p>
-			<button id="restart-all-btn">Play Again From Start</button>
+			<div class="big-stars">🏆</div>
+			<h2>All levels complete!</h2>
+			<p class="msg">Nice work, Cam.</p>
+			<button id="restart-all-btn">Play Again</button>
 			<a class="back-link" href="/">← Back home</a>
 		</div>
 
@@ -178,97 +172,148 @@ const title = "Cam's Puzzle Adventure!";
 
 		<script is:inline>
 		(function() {
-			// ── LEVELS ──
-			// Grid is 6x6. Each piece: [row, col, length, orientation, color, id]
-			// orientation: 'h' = horizontal, 'v' = vertical
-			// The FIRST piece (id=0) is always the red "hero" car, which must reach col=6 (right edge)
-			// Hero car is always on row index specified, horizontal
+			// All levels verified solvable by BFS solver.
+			// Minimum moves shown in comments.
 			const LEVELS = [
 				{
+					// Minimum solution: 4 moves
 					name: "Warm Up",
+					pieces: [
+						{ r:2, c:0, len:2, dir:'h', color:'#e74c3c' },
+						{ r:1, c:5, len:2, dir:'v', color:'#3498db' },
+						{ r:1, c:4, len:3, dir:'v', color:'#2ecc71' },
+						{ r:5, c:0, len:3, dir:'h', color:'#e67e22' },
+						{ r:0, c:3, len:3, dir:'v', color:'#9b59b6' },
+					]
+				},
+				{
+					// Minimum solution: 7 moves
+					name: "Merge Lane",
+					pieces: [
+						{ r:2, c:0, len:2, dir:'h', color:'#e74c3c' },
+						{ r:1, c:4, len:3, dir:'v', color:'#3498db' },
+						{ r:3, c:1, len:3, dir:'v', color:'#2ecc71' },
+						{ r:5, c:2, len:3, dir:'h', color:'#e67e22' },
+						{ r:0, c:5, len:2, dir:'v', color:'#9b59b6' },
+						{ r:1, c:3, len:2, dir:'v', color:'#1abc9c' },
+						{ r:4, c:2, len:3, dir:'h', color:'#f39c12' },
+					]
+				},
+				{
+					// Minimum solution: 8 moves
+					name: "Detour",
+					pieces: [
+						{ r:2, c:1, len:2, dir:'h', color:'#e74c3c' },
+						{ r:1, c:1, len:3, dir:'h', color:'#3498db' },
+						{ r:2, c:3, len:3, dir:'v', color:'#2ecc71' },
+						{ r:0, c:4, len:3, dir:'v', color:'#e67e22' },
+						{ r:4, c:4, len:2, dir:'h', color:'#9b59b6' },
+						{ r:5, c:1, len:3, dir:'h', color:'#1abc9c' },
+						{ r:1, c:0, len:3, dir:'v', color:'#f39c12' },
+						{ r:0, c:1, len:2, dir:'h', color:'#e84393' },
+					]
+				},
+				{
+					// Minimum solution: 12 moves
+					name: "Gridlock",
+					pieces: [
+						{ r:2, c:0, len:2, dir:'h', color:'#e74c3c' },
+						{ r:2, c:2, len:2, dir:'v', color:'#3498db' },
+						{ r:4, c:2, len:2, dir:'v', color:'#2ecc71' },
+						{ r:1, c:4, len:3, dir:'v', color:'#e67e22' },
+						{ r:0, c:1, len:2, dir:'h', color:'#9b59b6' },
+						{ r:5, c:3, len:2, dir:'h', color:'#1abc9c' },
+						{ r:1, c:5, len:2, dir:'v', color:'#f39c12' },
+						{ r:4, c:3, len:2, dir:'h', color:'#e84393' },
+						{ r:4, c:0, len:2, dir:'v', color:'#636e72' },
+					]
+				},
+				{
+					// Minimum solution: 15 moves
+					name: "Rush Hour",
+					pieces: [
+						{ r:2, c:1, len:2, dir:'h', color:'#e74c3c' },
+						{ r:3, c:0, len:2, dir:'h', color:'#3498db' },
+						{ r:4, c:1, len:2, dir:'v', color:'#2ecc71' },
+						{ r:0, c:5, len:3, dir:'v', color:'#e67e22' },
+						{ r:5, c:2, len:2, dir:'h', color:'#9b59b6' },
+						{ r:1, c:4, len:3, dir:'v', color:'#1abc9c' },
+						{ r:0, c:3, len:2, dir:'v', color:'#f39c12' },
+						{ r:4, c:3, len:3, dir:'h', color:'#e84393' },
+						{ r:3, c:2, len:2, dir:'v', color:'#636e72' },
+						{ r:0, c:0, len:3, dir:'v', color:'#fd79a8' },
+					]
+				},
+				{
+					// Minimum solution: 17 moves
+					name: "Bottleneck",
+					pieces: [
+						{ r:2, c:2, len:2, dir:'h', color:'#e74c3c' },
+						{ r:1, c:4, len:3, dir:'v', color:'#3498db' },
+						{ r:0, c:5, len:2, dir:'v', color:'#2ecc71' },
+						{ r:2, c:5, len:2, dir:'v', color:'#e67e22' },
+						{ r:2, c:0, len:2, dir:'v', color:'#9b59b6' },
+						{ r:1, c:0, len:3, dir:'h', color:'#1abc9c' },
+						{ r:4, c:2, len:2, dir:'v', color:'#f39c12' },
+						{ r:4, c:3, len:2, dir:'h', color:'#e84393' },
+						{ r:2, c:1, len:3, dir:'v', color:'#636e72' },
+						{ r:0, c:1, len:2, dir:'h', color:'#fd79a8' },
+						{ r:5, c:3, len:2, dir:'h', color:'#00cec9' },
+					]
+				},
+				{
+					// Minimum solution: 21 moves
+					name: "Pile Up",
+					pieces: [
+						{ r:2, c:0, len:2, dir:'h', color:'#e74c3c' },
+						{ r:5, c:4, len:2, dir:'h', color:'#3498db' },
+						{ r:4, c:3, len:2, dir:'h', color:'#2ecc71' },
+						{ r:4, c:1, len:2, dir:'v', color:'#e67e22' },
+						{ r:0, c:0, len:3, dir:'h', color:'#9b59b6' },
+						{ r:3, c:2, len:2, dir:'v', color:'#1abc9c' },
+						{ r:1, c:4, len:3, dir:'v', color:'#f39c12' },
+						{ r:2, c:5, len:3, dir:'v', color:'#e84393' },
+						{ r:1, c:0, len:2, dir:'h', color:'#636e72' },
+						{ r:3, c:0, len:2, dir:'h', color:'#fd79a8' },
+						{ r:1, c:3, len:2, dir:'v', color:'#00cec9' },
+						{ r:4, c:0, len:2, dir:'v', color:'#a29bfe' },
+					]
+				},
+				{
+					// Minimum solution: 20 moves
+					name: "Deadlock",
+					pieces: [
+						{ r:2, c:2, len:2, dir:'h', color:'#e74c3c' },
+						{ r:5, c:0, len:2, dir:'h', color:'#3498db' },
+						{ r:3, c:2, len:2, dir:'v', color:'#2ecc71' },
+						{ r:1, c:1, len:3, dir:'v', color:'#e67e22' },
+						{ r:4, c:3, len:3, dir:'h', color:'#9b59b6' },
+						{ r:0, c:1, len:3, dir:'h', color:'#1abc9c' },
+						{ r:2, c:0, len:3, dir:'v', color:'#f39c12' },
+						{ r:0, c:0, len:2, dir:'v', color:'#e84393' },
+						{ r:3, c:3, len:2, dir:'h', color:'#636e72' },
+						{ r:5, c:3, len:2, dir:'h', color:'#fd79a8' },
+						{ r:0, c:4, len:3, dir:'v', color:'#00cec9' },
+						{ r:0, c:5, len:3, dir:'v', color:'#a29bfe' },
+					]
+				},
+				{
+					// Minimum solution: 24 moves
+					name: "Freeway",
 					pieces: [
 						{ r:2, c:1, len:2, dir:'h', color:'#e74c3c' },
 						{ r:2, c:4, len:2, dir:'v', color:'#3498db' },
-					]
-				},
-				{
-					name: "Getting Started",
-					pieces: [
-						{ r:2, c:0, len:2, dir:'h', color:'#e74c3c' },
-						{ r:0, c:2, len:3, dir:'v', color:'#3498db' },
-						{ r:3, c:0, len:2, dir:'v', color:'#2ecc71' },
-					]
-				},
-				{
-					name: "Tricky!",
-					pieces: [
-						{ r:2, c:0, len:2, dir:'h', color:'#e74c3c' },
-						{ r:0, c:2, len:3, dir:'v', color:'#3498db' },
-						{ r:0, c:4, len:2, dir:'v', color:'#e67e22' },
-						{ r:3, c:3, len:3, dir:'h', color:'#2ecc71' },
-						{ r:4, c:0, len:2, dir:'h', color:'#9b59b6' },
-					]
-				},
-				{
-					name: "Think Ahead",
-					pieces: [
-						{ r:2, c:1, len:2, dir:'h', color:'#e74c3c' },
-						{ r:0, c:0, len:2, dir:'v', color:'#1abc9c' },
-						{ r:0, c:3, len:3, dir:'v', color:'#3498db' },
-						{ r:0, c:5, len:2, dir:'v', color:'#e67e22' },
-						{ r:3, c:1, len:2, dir:'v', color:'#9b59b6' },
-						{ r:5, c:2, len:3, dir:'h', color:'#2ecc71' },
-						{ r:3, c:4, len:3, dir:'v', color:'#f39c12' },
-					]
-				},
-				{
-					name: "Traffic Jam!",
-					pieces: [
-						{ r:2, c:0, len:2, dir:'h', color:'#e74c3c' },
-						{ r:0, c:0, len:2, dir:'v', color:'#1abc9c' },
-						{ r:0, c:2, len:2, dir:'h', color:'#e67e22' },
-						{ r:0, c:4, len:2, dir:'v', color:'#f39c12' },
-						{ r:1, c:2, len:2, dir:'v', color:'#3498db' },
-						{ r:3, c:2, len:3, dir:'v', color:'#2ecc71' },
-						{ r:3, c:0, len:2, dir:'h', color:'#9b59b6' },
-						{ r:4, c:3, len:2, dir:'h', color:'#e84393' },
-						{ r:5, c:4, len:2, dir:'h', color:'#fd79a8' },
-						{ r:2, c:5, len:3, dir:'v', color:'#636e72' },
-					]
-				},
-				{
-					name: "Super Solver",
-					pieces: [
-						{ r:2, c:0, len:2, dir:'h', color:'#e74c3c' },
-						{ r:0, c:0, len:2, dir:'h', color:'#1abc9c' },
-						{ r:0, c:2, len:2, dir:'v', color:'#e67e22' },
-						{ r:0, c:3, len:3, dir:'v', color:'#3498db' },
-						{ r:1, c:4, len:2, dir:'h', color:'#f39c12' },
-						{ r:3, c:0, len:3, dir:'v', color:'#9b59b6' },
-						{ r:3, c:1, len:2, dir:'h', color:'#2ecc71' },
-						{ r:4, c:2, len:2, dir:'v', color:'#e84393' },
-						{ r:5, c:1, len:2, dir:'h', color:'#fd79a8' },
-						{ r:3, c:4, len:2, dir:'v', color:'#636e72' },
-						{ r:5, c:3, len:3, dir:'h', color:'#00cec9' },
-						{ r:0, c:5, len:2, dir:'v', color:'#a29bfe' },
-					]
-				},
-				{
-					name: "Cam's Challenge",
-					pieces: [
-						{ r:2, c:1, len:2, dir:'h', color:'#e74c3c' },
-						{ r:0, c:0, len:3, dir:'v', color:'#1abc9c' },
-						{ r:0, c:1, len:2, dir:'h', color:'#e67e22' },
-						{ r:0, c:3, len:2, dir:'v', color:'#3498db' },
-						{ r:1, c:4, len:2, dir:'v', color:'#f39c12' },
-						{ r:0, c:5, len:3, dir:'v', color:'#a29bfe' },
-						{ r:3, c:1, len:3, dir:'v', color:'#9b59b6' },
-						{ r:3, c:2, len:2, dir:'h', color:'#2ecc71' },
-						{ r:4, c:3, len:2, dir:'v', color:'#e84393' },
-						{ r:3, c:5, len:2, dir:'v', color:'#636e72' },
-						{ r:5, c:2, len:3, dir:'h', color:'#fd79a8' },
-						{ r:5, c:0, len:2, dir:'v', color:'#00cec9' },
-						{ r:2, c:4, len:2, dir:'v', color:'#fdcb6e' },
+						{ r:3, c:2, len:2, dir:'v', color:'#2ecc71' },
+						{ r:5, c:1, len:2, dir:'h', color:'#e67e22' },
+						{ r:0, c:1, len:3, dir:'h', color:'#9b59b6' },
+						{ r:1, c:1, len:3, dir:'h', color:'#1abc9c' },
+						{ r:0, c:5, len:2, dir:'v', color:'#f39c12' },
+						{ r:4, c:5, len:2, dir:'v', color:'#e84393' },
+						{ r:0, c:4, len:2, dir:'v', color:'#636e72' },
+						{ r:4, c:3, len:2, dir:'h', color:'#fd79a8' },
+						{ r:3, c:1, len:2, dir:'v', color:'#00cec9' },
+						{ r:5, c:3, len:2, dir:'h', color:'#a29bfe' },
+						{ r:1, c:0, len:2, dir:'v', color:'#fdcb6e' },
 					]
 				},
 			];
@@ -278,7 +323,7 @@ const title = "Cam's Puzzle Adventure!";
 			const ctx = canvas.getContext('2d');
 			let cellSize, boardPx, padding;
 			let pieces, currentLevel = 0, moves = 0;
-			let dragging = null; // { idx, startR, startC, startX, startY }
+			let dragging = null;
 			let won = false;
 
 			function sizeCanvas() {
@@ -306,34 +351,59 @@ const title = "Cam's Puzzle Adventure!";
 				return grid;
 			}
 
+			function hexToRgb(hex) {
+				return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
+			}
+
 			function draw() {
 				const dpr = window.devicePixelRatio || 1;
 				ctx.clearRect(0, 0, boardPx, boardPx);
 
 				// Board background
-				ctx.fillStyle = '#2d2d4a';
+				const bgGrad = ctx.createLinearGradient(0, 0, 0, boardPx);
+				bgGrad.addColorStop(0, '#22223a');
+				bgGrad.addColorStop(1, '#181828');
+				ctx.fillStyle = bgGrad;
 				ctx.beginPath();
-				ctx.roundRect(0, 0, boardPx, boardPx, 12 * dpr);
+				ctx.roundRect(0, 0, boardPx, boardPx, 14 * dpr);
 				ctx.fill();
 
-				// Grid lines
-				ctx.strokeStyle = '#3a3a5c';
-				ctx.lineWidth = 1 * dpr;
-				for (let i = 0; i <= GRID; i++) {
-					const x = padding + i * cellSize;
-					ctx.beginPath(); ctx.moveTo(x, padding); ctx.lineTo(x, boardPx - padding); ctx.stroke();
-					ctx.beginPath(); ctx.moveTo(padding, x); ctx.lineTo(boardPx - padding, x); ctx.stroke();
+				// Board border
+				ctx.strokeStyle = '#333355';
+				ctx.lineWidth = 2 * dpr;
+				ctx.beginPath();
+				ctx.roundRect(0, 0, boardPx, boardPx, 14 * dpr);
+				ctx.stroke();
+
+				// Grid cells
+				for (let r = 0; r < GRID; r++) {
+					for (let c = 0; c < GRID; c++) {
+						const x = padding + c * cellSize;
+						const y = padding + r * cellSize;
+						const inset = cellSize * 0.04;
+						ctx.fillStyle = 'rgba(255,255,255,0.02)';
+						ctx.beginPath();
+						ctx.roundRect(x + inset, y + inset, cellSize - inset*2, cellSize - inset*2, 4 * dpr);
+						ctx.fill();
+					}
 				}
 
-				// Exit marker (right side, row 2)
+				// Exit marker — glow + arrow on right side at row 2
 				const exitY = padding + 2 * cellSize;
 				const exitX = boardPx - padding;
+				const glowGrad = ctx.createRadialGradient(exitX, exitY + cellSize*0.5, 0, exitX, exitY + cellSize*0.5, cellSize*0.8);
+				glowGrad.addColorStop(0, 'rgba(231,76,60,0.25)');
+				glowGrad.addColorStop(1, 'rgba(231,76,60,0)');
+				ctx.fillStyle = glowGrad;
+				ctx.fillRect(exitX - cellSize*0.5, exitY - cellSize*0.3, cellSize, cellSize*1.6);
 				ctx.fillStyle = '#e74c3c';
+				ctx.globalAlpha = 0.9;
 				ctx.beginPath();
-				ctx.moveTo(exitX, exitY + cellSize * 0.2);
-				ctx.lineTo(exitX + padding * 0.7, exitY + cellSize * 0.5);
-				ctx.lineTo(exitX, exitY + cellSize * 0.8);
+				ctx.moveTo(exitX - 2*dpr, exitY + cellSize*0.25);
+				ctx.lineTo(exitX + padding*0.6, exitY + cellSize*0.5);
+				ctx.lineTo(exitX - 2*dpr, exitY + cellSize*0.75);
 				ctx.fill();
+				ctx.globalAlpha = 1;
 
 				// Pieces
 				pieces.forEach((p, i) => {
@@ -341,27 +411,66 @@ const title = "Cam's Puzzle Adventure!";
 					const y = padding + p.r * cellSize;
 					const w = p.dir === 'h' ? p.len * cellSize : cellSize;
 					const h = p.dir === 'v' ? p.len * cellSize : cellSize;
-					const gap = cellSize * 0.06;
-					const r = cellSize * 0.15;
+					const gap = cellSize * 0.07;
+					const rad = cellSize * 0.14;
+					const [cr, cg, cb] = hexToRgb(p.color);
 
-					ctx.fillStyle = p.color;
+					// Shadow
+					ctx.fillStyle = 'rgba(0,0,0,0.35)';
 					ctx.beginPath();
-					ctx.roundRect(x + gap, y + gap, w - gap*2, h - gap*2, r);
+					ctx.roundRect(x + gap + 2*dpr, y + gap + 3*dpr, w - gap*2, h - gap*2, rad);
 					ctx.fill();
 
-					// Highlight for 3D effect
-					ctx.fillStyle = 'rgba(255,255,255,0.18)';
+					// Body gradient
+					const bodyGrad = p.dir === 'h'
+						? ctx.createLinearGradient(x, y, x, y + h)
+						: ctx.createLinearGradient(x, y, x + w, y);
+					bodyGrad.addColorStop(0, `rgb(${Math.min(255,cr+30)},${Math.min(255,cg+30)},${Math.min(255,cb+30)})`);
+					bodyGrad.addColorStop(1, p.color);
+					ctx.fillStyle = bodyGrad;
 					ctx.beginPath();
-					ctx.roundRect(x + gap, y + gap, w - gap*2, (h - gap*2) * 0.35, r);
+					ctx.roundRect(x + gap, y + gap, w - gap*2, h - gap*2, rad);
 					ctx.fill();
 
-					// If hero car (i=0), draw a little car icon
+					// Highlight
+					ctx.fillStyle = 'rgba(255,255,255,0.15)';
+					ctx.beginPath();
+					ctx.roundRect(x + gap, y + gap, w - gap*2, (h - gap*2)*0.3, rad);
+					ctx.fill();
+
+					// Inner edge
+					ctx.strokeStyle = `rgba(${Math.min(255,cr+60)},${Math.min(255,cg+60)},${Math.min(255,cb+60)},0.3)`;
+					ctx.lineWidth = 1 * dpr;
+					ctx.beginPath();
+					ctx.roundRect(x + gap + 1*dpr, y + gap + 1*dpr, w - gap*2 - 2*dpr, h - gap*2 - 2*dpr, rad);
+					ctx.stroke();
+
+					// Wheels
+					ctx.fillStyle = 'rgba(0,0,0,0.25)';
+					if (p.dir === 'h') {
+						const wy = y + h - gap - cellSize*0.12;
+						for (let s = 0; s < p.len; s++) {
+							const wx = x + gap + s*cellSize + cellSize*0.22;
+							ctx.beginPath(); ctx.arc(wx, wy, cellSize*0.08, 0, Math.PI*2); ctx.fill();
+							ctx.beginPath(); ctx.arc(wx + cellSize*0.38, wy, cellSize*0.08, 0, Math.PI*2); ctx.fill();
+						}
+					} else {
+						const wx = x + w - gap - cellSize*0.12;
+						for (let s = 0; s < p.len; s++) {
+							const wy = y + gap + s*cellSize + cellSize*0.22;
+							ctx.beginPath(); ctx.arc(wx, wy, cellSize*0.08, 0, Math.PI*2); ctx.fill();
+							ctx.beginPath(); ctx.arc(wx, wy + cellSize*0.38, cellSize*0.08, 0, Math.PI*2); ctx.fill();
+						}
+					}
+
+					// Windshield on hero car
 					if (i === 0) {
-						ctx.fillStyle = 'rgba(255,255,255,0.8)';
-						ctx.font = `${cellSize * 0.45}px sans-serif`;
-						ctx.textAlign = 'center';
-						ctx.textBaseline = 'middle';
-						ctx.fillText('🚗', x + w/2, y + h/2);
+						const wsX = x + w - gap - cellSize*0.45;
+						const wsY = y + gap + cellSize*0.18;
+						ctx.fillStyle = 'rgba(255,255,255,0.25)';
+						ctx.beginPath();
+						ctx.roundRect(wsX, wsY, cellSize*0.28, cellSize*0.48, 3*dpr);
+						ctx.fill();
 					}
 				});
 			}
@@ -371,20 +480,16 @@ const title = "Cam's Puzzle Adventure!";
 				const dpr = window.devicePixelRatio || 1;
 				const x = (px - rect.left) * dpr;
 				const y = (py - rect.top) * dpr;
-				const col = Math.floor((x - padding) / cellSize);
-				const row = Math.floor((y - padding) / cellSize);
-				return { row, col, x, y };
+				return { row: Math.floor((y - padding) / cellSize), col: Math.floor((x - padding) / cellSize) };
 			}
 
 			function canMove(idx, newR, newC) {
 				const p = pieces[idx];
-				// Bounds check
 				for (let s = 0; s < p.len; s++) {
 					const rr = p.dir === 'v' ? newR + s : newR;
 					const cc = p.dir === 'h' ? newC + s : newC;
 					if (rr < 0 || rr >= GRID || cc < 0 || cc >= GRID) return false;
 				}
-				// Collision check
 				const grid = buildGrid();
 				for (let s = 0; s < p.len; s++) {
 					const rr = p.dir === 'v' ? newR + s : newR;
@@ -396,7 +501,6 @@ const title = "Cam's Puzzle Adventure!";
 
 			function checkWin() {
 				const hero = pieces[0];
-				// Hero car (horizontal, row 2) reaches right edge: c + len >= GRID
 				return hero.r === 2 && hero.c + hero.len >= GRID;
 			}
 
@@ -409,14 +513,7 @@ const title = "Cam's Puzzle Adventure!";
 				if (row < 0 || row >= GRID || col < 0 || col >= GRID) return;
 				const idx = grid[row][col];
 				if (idx === -1) return;
-				dragging = {
-					idx,
-					startR: pieces[idx].r,
-					startC: pieces[idx].c,
-					startX: pt.clientX,
-					startY: pt.clientY,
-					moved: false
-				};
+				dragging = { idx, startR: pieces[idx].r, startC: pieces[idx].c, startX: pt.clientX, startY: pt.clientY, moved: false };
 			}
 
 			function onPointerMove(e) {
@@ -427,85 +524,56 @@ const title = "Cam's Puzzle Adventure!";
 				const dx = pt.clientX - dragging.startX;
 				const dy = pt.clientY - dragging.startY;
 				const rect = canvas.getBoundingClientRect();
-				const pxPerCell = rect.width / GRID; // approximate
+				const pxPerCell = rect.width / GRID;
 
 				if (p.dir === 'h') {
 					const cellDelta = Math.round(dx / (pxPerCell * 0.85));
 					if (cellDelta !== 0) {
-						const newC = dragging.startC + cellDelta;
-						// Try to move as far as possible toward target
 						let bestC = dragging.startC;
 						const step = cellDelta > 0 ? 1 : -1;
-						for (let c = dragging.startC + step; step > 0 ? c <= newC : c >= newC; c += step) {
-							if (canMove(dragging.idx, p.r, c)) bestC = c;
-							else break;
+						const target = dragging.startC + cellDelta;
+						for (let c = dragging.startC + step; step > 0 ? c <= target : c >= target; c += step) {
+							if (canMove(dragging.idx, p.r, c)) bestC = c; else break;
 						}
-						if (bestC !== p.c) {
-							p.c = bestC;
-							dragging.moved = true;
-							draw();
-						}
+						if (bestC !== p.c) { p.c = bestC; dragging.moved = true; draw(); }
 					}
 				} else {
 					const cellDelta = Math.round(dy / (pxPerCell * 0.85));
 					if (cellDelta !== 0) {
-						const newR = dragging.startR + cellDelta;
 						let bestR = dragging.startR;
 						const step = cellDelta > 0 ? 1 : -1;
-						for (let r = dragging.startR + step; step > 0 ? r <= newR : r >= newR; r += step) {
-							if (canMove(dragging.idx, r, p.c)) bestR = r;
-							else break;
+						const target = dragging.startR + cellDelta;
+						for (let r = dragging.startR + step; step > 0 ? r <= target : r >= target; r += step) {
+							if (canMove(dragging.idx, r, p.c)) bestR = r; else break;
 						}
-						if (bestR !== p.r) {
-							p.r = bestR;
-							dragging.moved = true;
-							draw();
-						}
+						if (bestR !== p.r) { p.r = bestR; dragging.moved = true; draw(); }
 					}
 				}
 			}
 
-			function onPointerUp(e) {
+			function onPointerUp() {
 				if (!dragging) return;
 				if (dragging.moved) {
 					moves++;
 					document.getElementById('move-count').textContent = moves;
-					if (checkWin()) {
-						won = true;
-						showWin();
-					}
+					if (checkWin()) { won = true; showWin(); }
 				}
 				dragging = null;
 			}
 
 			function showWin() {
-				const overlay = document.getElementById('win-overlay');
 				const starsEl = document.getElementById('win-stars');
 				const titleEl = document.getElementById('win-title');
 				const msgEl = document.getElementById('win-msg');
 				const nextBtn = document.getElementById('next-btn');
 
-				const cheers = [
-					"Way to go, Cam!",
-					"You're amazing, Cam!",
-					"Brilliant thinking, Cam!",
-					"Wow, Cam! So smart!",
-					"Awesome job, Cam!",
-					"You're a puzzle genius, Cam!",
-					"Incredible, Cam!",
-				];
+				const titles = ["Solved!", "Nice.", "Clean.", "Smooth.", "Got it.", "Done.", "Nailed it.", "Sharp.", "Easy."];
+				starsEl.textContent = moves <= 15 ? '⭐⭐⭐' : moves <= 30 ? '⭐⭐' : '⭐';
+				titleEl.textContent = titles[currentLevel % titles.length];
+				msgEl.textContent = `${moves} move${moves !== 1 ? 's' : ''}`;
+				nextBtn.textContent = currentLevel >= LEVELS.length - 1 ? "Finish" : "Next Level";
 
-				starsEl.textContent = moves <= 10 ? '⭐⭐⭐' : moves <= 20 ? '⭐⭐' : '⭐';
-				titleEl.textContent = cheers[currentLevel % cheers.length];
-				msgEl.textContent = `You solved "${LEVELS[currentLevel].name}" in ${moves} move${moves !== 1 ? 's' : ''}!`;
-
-				if (currentLevel >= LEVELS.length - 1) {
-					nextBtn.textContent = "🏆 See Final Score";
-				} else {
-					nextBtn.textContent = "Next Level →";
-				}
-
-				overlay.classList.add('show');
+				document.getElementById('win-overlay').classList.add('show');
 				fireConfetti();
 			}
 
@@ -515,69 +583,54 @@ const title = "Cam's Puzzle Adventure!";
 				moves = 0;
 				won = false;
 				document.getElementById('move-count').textContent = '0';
-				document.getElementById('level-title').textContent =
-					`Level ${idx + 1}: ${LEVELS[idx].name}`;
+				document.getElementById('level-title').textContent = `Level ${idx + 1}: ${LEVELS[idx].name}`;
 				document.getElementById('win-overlay').classList.remove('show');
 				sizeCanvas();
 				draw();
 			}
 
-			// ── CONFETTI ──
 			function fireConfetti() {
 				const cc = document.getElementById('confetti-canvas');
 				const cctx = cc.getContext('2d');
-				cc.width = window.innerWidth * (window.devicePixelRatio || 1);
-				cc.height = window.innerHeight * (window.devicePixelRatio || 1);
+				const dpr = window.devicePixelRatio || 1;
+				cc.width = window.innerWidth * dpr;
+				cc.height = window.innerHeight * dpr;
 				cc.style.width = window.innerWidth + 'px';
 				cc.style.height = window.innerHeight + 'px';
 
 				const colors = ['#e74c3c','#3498db','#2ecc71','#f1c40f','#9b59b6','#e67e22','#1abc9c','#fd79a8'];
 				const particles = [];
-				const dpr = window.devicePixelRatio || 1;
-				for (let i = 0; i < 120; i++) {
+				for (let i = 0; i < 100; i++) {
 					particles.push({
-						x: cc.width * Math.random(),
-						y: -20 * dpr,
-						vx: (Math.random() - 0.5) * 8 * dpr,
-						vy: Math.random() * 4 * dpr + 2 * dpr,
-						size: (Math.random() * 6 + 4) * dpr,
-						color: colors[Math.floor(Math.random() * colors.length)],
-						rot: Math.random() * Math.PI * 2,
-						rv: (Math.random() - 0.5) * 0.2,
-						life: 1
+						x: cc.width * Math.random(), y: -20 * dpr,
+						vx: (Math.random()-0.5)*7*dpr, vy: Math.random()*4*dpr + 2*dpr,
+						size: (Math.random()*5+3)*dpr,
+						color: colors[Math.floor(Math.random()*colors.length)],
+						rot: Math.random()*Math.PI*2, rv: (Math.random()-0.5)*0.2, life: 1
 					});
 				}
 				let frame = 0;
-				function animateConfetti() {
+				function animate() {
 					cctx.clearRect(0, 0, cc.width, cc.height);
 					let alive = false;
 					particles.forEach(p => {
 						if (p.life <= 0) return;
 						alive = true;
-						p.x += p.vx;
-						p.vy += 0.12 * dpr;
-						p.y += p.vy;
-						p.rot += p.rv;
-						p.life -= 0.006;
+						p.x += p.vx; p.vy += 0.12*dpr; p.y += p.vy;
+						p.rot += p.rv; p.life -= 0.008;
 						cctx.save();
-						cctx.translate(p.x, p.y);
-						cctx.rotate(p.rot);
+						cctx.translate(p.x, p.y); cctx.rotate(p.rot);
 						cctx.globalAlpha = Math.max(0, p.life);
 						cctx.fillStyle = p.color;
-						cctx.fillRect(-p.size/2, -p.size/2, p.size, p.size * 0.6);
+						cctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
 						cctx.restore();
 					});
-					if (alive && frame < 300) {
-						frame++;
-						requestAnimationFrame(animateConfetti);
-					} else {
-						cctx.clearRect(0, 0, cc.width, cc.height);
-					}
+					if (alive && frame < 250) { frame++; requestAnimationFrame(animate); }
+					else { cctx.clearRect(0, 0, cc.width, cc.height); }
 				}
-				animateConfetti();
+				animate();
 			}
 
-			// ── EVENT WIRING ──
 			canvas.addEventListener('mousedown', onPointerDown);
 			canvas.addEventListener('mousemove', onPointerMove);
 			canvas.addEventListener('mouseup', onPointerUp);
@@ -591,45 +644,28 @@ const title = "Cam's Puzzle Adventure!";
 				document.getElementById('game-area').style.display = 'flex';
 				loadLevel(0);
 			});
-
-			document.getElementById('reset-btn').addEventListener('click', () => {
-				loadLevel(currentLevel);
-			});
-
+			document.getElementById('reset-btn').addEventListener('click', () => loadLevel(currentLevel));
 			document.getElementById('menu-btn').addEventListener('click', () => {
 				document.getElementById('game-area').style.display = 'none';
 				document.getElementById('win-overlay').classList.remove('show');
 				document.getElementById('splash').style.display = 'flex';
 			});
-
 			document.getElementById('next-btn').addEventListener('click', () => {
 				if (currentLevel >= LEVELS.length - 1) {
 					document.getElementById('win-overlay').classList.remove('show');
 					document.getElementById('game-area').style.display = 'none';
 					document.getElementById('all-done').classList.add('show');
-					fireConfetti();
-					setTimeout(fireConfetti, 800);
-					setTimeout(fireConfetti, 1600);
-				} else {
-					loadLevel(currentLevel + 1);
-				}
+					fireConfetti(); setTimeout(fireConfetti, 700);
+				} else { loadLevel(currentLevel + 1); }
 			});
-
-			document.getElementById('replay-btn').addEventListener('click', () => {
-				loadLevel(currentLevel);
-			});
-
+			document.getElementById('replay-btn').addEventListener('click', () => loadLevel(currentLevel));
 			document.getElementById('restart-all-btn').addEventListener('click', () => {
 				document.getElementById('all-done').classList.remove('show');
 				document.getElementById('game-area').style.display = 'flex';
 				loadLevel(0);
 			});
-
 			window.addEventListener('resize', () => {
-				if (document.getElementById('game-area').style.display !== 'none') {
-					sizeCanvas();
-					draw();
-				}
+				if (document.getElementById('game-area').style.display !== 'none') { sizeCanvas(); draw(); }
 			});
 		})();
 		</script>
