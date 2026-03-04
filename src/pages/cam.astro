@@ -1,0 +1,608 @@
+---
+const title = "Cam's Puzzle Jam!";
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<style>
+			* { margin: 0; padding: 0; box-sizing: border-box; }
+			body {
+				background: #1a1a2e;
+				color: #e8e8e0;
+				font-family: "Fredoka", "Nunito", "Segoe UI", system-ui, sans-serif;
+				min-height: 100vh;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				overflow-x: hidden;
+				-webkit-user-select: none;
+				user-select: none;
+				touch-action: none;
+			}
+			header {
+				text-align: center;
+				padding: 1.2rem 1rem 0.5rem;
+				width: 100%;
+			}
+			header h1 {
+				font-size: 1.8rem;
+				letter-spacing: 0.02em;
+			}
+			header h1 span { color: #f7dc6f; }
+			.level-info {
+				font-size: 1rem;
+				color: #aaa;
+				margin-top: 0.25rem;
+			}
+			.level-info strong { color: #7ec8e3; }
+			#game-area {
+				position: relative;
+				margin: 0.5rem auto;
+				touch-action: none;
+			}
+			.grid-bg {
+				position: absolute;
+				inset: 0;
+				border-radius: 12px;
+				background: #16213e;
+				border: 3px solid #0f3460;
+			}
+			.exit-marker {
+				position: absolute;
+				background: #2ecc71;
+				border-radius: 4px;
+				animation: pulse 1.5s ease-in-out infinite;
+			}
+			@keyframes pulse {
+				0%, 100% { opacity: 0.6; }
+				50% { opacity: 1; }
+			}
+			.block {
+				position: absolute;
+				border-radius: 10px;
+				cursor: grab;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 1.5rem;
+				font-weight: 700;
+				transition: box-shadow 0.15s;
+				border: 2px solid rgba(255,255,255,0.15);
+				z-index: 2;
+			}
+			.block.dragging {
+				box-shadow: 0 0 20px rgba(255,255,255,0.3);
+				z-index: 10;
+				cursor: grabbing;
+			}
+			.block.hero {
+				border-color: rgba(255,255,255,0.3);
+				z-index: 3;
+			}
+			.btn-row {
+				display: flex;
+				gap: 0.75rem;
+				margin-top: 0.75rem;
+				flex-wrap: wrap;
+				justify-content: center;
+			}
+			button {
+				background: #0f3460;
+				color: #e8e8e0;
+				border: 2px solid #7ec8e3;
+				border-radius: 10px;
+				padding: 0.6rem 1.4rem;
+				font-size: 1rem;
+				font-family: inherit;
+				cursor: pointer;
+				transition: background 0.15s;
+			}
+			button:hover, button:active { background: #1a4a7a; }
+			.moves {
+				margin-top: 0.5rem;
+				font-size: 0.95rem;
+				color: #aaa;
+			}
+			/* Win overlay */
+			#win-overlay {
+				display: none;
+				position: fixed;
+				inset: 0;
+				background: rgba(0,0,0,0.7);
+				z-index: 100;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+				padding: 2rem;
+			}
+			#win-overlay.show { display: flex; }
+			#win-overlay h2 {
+				font-size: 2.5rem;
+				color: #f7dc6f;
+				margin-bottom: 0.5rem;
+			}
+			#win-overlay .stars {
+				font-size: 3rem;
+				margin-bottom: 0.5rem;
+			}
+			#win-overlay p {
+				font-size: 1.2rem;
+				color: #ccc;
+				margin-bottom: 1rem;
+			}
+			.confetti-piece {
+				position: fixed;
+				width: 10px;
+				height: 10px;
+				border-radius: 2px;
+				z-index: 101;
+				pointer-events: none;
+			}
+			#level-select {
+				display: flex;
+				gap: 0.5rem;
+				flex-wrap: wrap;
+				justify-content: center;
+				margin-top: 0.5rem;
+			}
+			#level-select button {
+				width: 2.5rem;
+				height: 2.5rem;
+				padding: 0;
+				font-size: 1.1rem;
+				font-weight: 700;
+			}
+			#level-select button.current {
+				background: #7ec8e3;
+				color: #1a1a2e;
+			}
+			#level-select button.solved {
+				border-color: #2ecc71;
+				color: #2ecc71;
+			}
+			.hint-text {
+				font-size: 0.85rem;
+				color: #888;
+				margin-top: 0.4rem;
+				min-height: 1.2em;
+			}
+			@media (max-width: 500px) {
+				header h1 { font-size: 1.4rem; }
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<h1>Hey Cam! <span>Puzzle Jam</span></h1>
+			<div class="level-info">Level <strong id="level-num">1</strong> of <strong id="level-total">8</strong></div>
+		</header>
+		<div id="game-area">
+			<div class="grid-bg"></div>
+		</div>
+		<div class="moves">Moves: <span id="move-count">0</span></div>
+		<div class="hint-text" id="hint-text">Slide the gold car to the green exit!</div>
+		<div class="btn-row">
+			<button id="btn-reset">Start Over</button>
+			<button id="btn-prev">Prev</button>
+			<button id="btn-next">Next</button>
+		</div>
+		<div id="level-select"></div>
+
+		<div id="win-overlay">
+			<div class="stars" id="win-stars"></div>
+			<h2 id="win-title"></h2>
+			<p id="win-msg"></p>
+			<div class="btn-row">
+				<button id="btn-next-level">Next Level</button>
+				<button id="btn-replay">Play Again</button>
+			</div>
+		</div>
+
+		<script is:inline>
+		(function() {
+			// ---- LEVELS ----
+			// Grid is 6x6. Each block: [row, col, length, orientation('h'|'v'), color, emoji]
+			// Hero car is always index 0, horizontal, on the row where exit is.
+			const LEVELS = [
+				{
+					name: "Warm Up",
+					hero: [2, 0, 2, 'h', '#e67e22', '🚗'],
+					blocks: [
+						[0, 2, 3, 'v', '#3498db', '🚙'],
+					],
+					exit: [2, 5] // row, side (5 = right edge)
+				},
+				{
+					name: "Getting Started",
+					hero: [2, 0, 2, 'h', '#e67e22', '🚗'],
+					blocks: [
+						[0, 2, 2, 'v', '#3498db', '🚙'],
+						[2, 4, 2, 'v', '#e74c3c', '🚒'],
+						[0, 5, 3, 'v', '#9b59b6', '🚐'],
+					],
+					exit: [2, 5]
+				},
+				{
+					name: "Tricky!",
+					hero: [2, 1, 2, 'h', '#e67e22', '🚗'],
+					blocks: [
+						[0, 0, 2, 'v', '#1abc9c', '🚕'],
+						[0, 3, 3, 'v', '#e74c3c', '🚒'],
+						[3, 0, 2, 'h', '#9b59b6', '🚐'],
+						[5, 2, 2, 'h', '#3498db', '🚙'],
+						[0, 5, 2, 'v', '#f39c12', '🛻'],
+					],
+					exit: [2, 5]
+				},
+				{
+					name: "Traffic Jam",
+					hero: [2, 0, 2, 'h', '#e67e22', '🚗'],
+					blocks: [
+						[0, 2, 2, 'v', '#3498db', '🚙'],
+						[0, 3, 2, 'h', '#e74c3c', '🚒'],
+						[2, 3, 3, 'v', '#9b59b6', '🚐'],
+						[1, 5, 3, 'v', '#f39c12', '🛻'],
+						[4, 0, 2, 'h', '#1abc9c', '🚕'],
+						[5, 2, 2, 'h', '#2ecc71', '🚎'],
+					],
+					exit: [2, 5]
+				},
+				{
+					name: "Busy Road",
+					hero: [2, 0, 2, 'h', '#e67e22', '🚗'],
+					blocks: [
+						[0, 2, 3, 'v', '#e74c3c', '🚒'],
+						[0, 4, 2, 'h', '#3498db', '🚙'],
+						[1, 4, 2, 'v', '#9b59b6', '🚐'],
+						[3, 3, 2, 'h', '#f39c12', '🛻'],
+						[3, 5, 2, 'v', '#1abc9c', '🚕'],
+						[4, 0, 3, 'h', '#2ecc71', '🚎'],
+						[5, 3, 3, 'h', '#d35400', '🚌'],
+					],
+					exit: [2, 5]
+				},
+				{
+					name: "Rush Hour",
+					hero: [2, 0, 2, 'h', '#e67e22', '🚗'],
+					blocks: [
+						[0, 0, 2, 'v', '#3498db', '🚙'],
+						[0, 1, 2, 'h', '#1abc9c', '🚕'],
+						[0, 4, 2, 'v', '#9b59b6', '🚐'],
+						[1, 2, 2, 'v', '#e74c3c', '🚒'],
+						[3, 1, 3, 'v', '#2ecc71', '🚎'],
+						[3, 3, 2, 'h', '#f39c12', '🛻'],
+						[4, 4, 2, 'v', '#d35400', '🚌'],
+						[5, 0, 2, 'h', '#c0392b', '🏎️'],
+					],
+					exit: [2, 5]
+				},
+				{
+					name: "Brain Buster",
+					hero: [2, 0, 2, 'h', '#e67e22', '🚗'],
+					blocks: [
+						[0, 0, 3, 'v', '#3498db', '🚙'],
+						[0, 1, 2, 'h', '#1abc9c', '🚕'],
+						[1, 1, 2, 'h', '#e74c3c', '🚒'],
+						[0, 4, 3, 'v', '#9b59b6', '🚐'],
+						[3, 2, 3, 'v', '#f39c12', '🛻'],
+						[3, 4, 2, 'h', '#2ecc71', '🚎'],
+						[4, 0, 2, 'v', '#d35400', '🚌'],
+						[5, 1, 3, 'h', '#c0392b', '🏎️'],
+						[3, 0, 2, 'h', '#8e44ad', '🚑'],
+					],
+					exit: [2, 5]
+				},
+				{
+					name: "Cam's Challenge",
+					hero: [2, 0, 2, 'h', '#e67e22', '🚗'],
+					blocks: [
+						[0, 2, 3, 'v', '#3498db', '🚙'],
+						[0, 3, 2, 'h', '#1abc9c', '🚕'],
+						[1, 4, 2, 'v', '#e74c3c', '🚒'],
+						[0, 5, 3, 'v', '#9b59b6', '🚐'],
+						[3, 3, 3, 'v', '#f39c12', '🛻'],
+						[3, 4, 2, 'h', '#2ecc71', '🚎'],
+						[4, 0, 2, 'v', '#d35400', '🚌'],
+						[5, 1, 2, 'h', '#c0392b', '🏎️'],
+						[5, 4, 2, 'h', '#8e44ad', '🚑'],
+						[3, 0, 2, 'h', '#16a085', '🏍️'],
+					],
+					exit: [2, 5]
+				},
+			];
+
+			const GRID = 6;
+			let CELL;
+			let currentLevel = 0;
+			let moves = 0;
+			let blocks = []; // current block states: {row,col,len,dir,color,emoji,el}
+			let dragging = null;
+			let dragStartX, dragStartY, dragOrigRow, dragOrigCol;
+			let solved = new Set();
+
+			const gameArea = document.getElementById('game-area');
+			const moveCount = document.getElementById('move-count');
+			const levelNum = document.getElementById('level-num');
+			const levelTotal = document.getElementById('level-total');
+			const hintText = document.getElementById('hint-text');
+			const winOverlay = document.getElementById('win-overlay');
+			const winTitle = document.getElementById('win-title');
+			const winMsg = document.getElementById('win-msg');
+			const winStars = document.getElementById('win-stars');
+
+			levelTotal.textContent = LEVELS.length;
+
+			function calcCellSize() {
+				const maxW = Math.min(window.innerWidth - 32, 450);
+				CELL = Math.floor(maxW / GRID);
+				const total = CELL * GRID;
+				gameArea.style.width = (total + 6) + 'px';
+				gameArea.style.height = (total + 6) + 'px';
+			}
+
+			function buildGrid(levelIdx) {
+				// Remove old blocks
+				gameArea.querySelectorAll('.block, .exit-marker').forEach(el => el.remove());
+				const lv = LEVELS[levelIdx];
+				blocks = [];
+
+				// Exit marker
+				const ex = document.createElement('div');
+				ex.className = 'exit-marker';
+				const exitRow = lv.exit[0];
+				ex.style.top = (3 + exitRow * CELL + 4) + 'px';
+				ex.style.left = (3 + 5 * CELL + CELL - 8) + 'px';
+				ex.style.width = '8px';
+				ex.style.height = (CELL - 8) + 'px';
+				gameArea.appendChild(ex);
+
+				// Hero block
+				addBlock(lv.hero[0], lv.hero[1], lv.hero[2], lv.hero[3], lv.hero[4], lv.hero[5], true);
+				// Other blocks
+				lv.blocks.forEach(b => addBlock(b[0], b[1], b[2], b[3], b[4], b[5], false));
+
+				moves = 0;
+				moveCount.textContent = '0';
+				levelNum.textContent = levelIdx + 1;
+				hintText.textContent = levelIdx === 0
+					? "Slide the gold car to the green exit!"
+					: LEVELS[levelIdx].name;
+			}
+
+			function addBlock(row, col, len, dir, color, emoji, isHero) {
+				const el = document.createElement('div');
+				el.className = 'block' + (isHero ? ' hero' : '');
+				const w = dir === 'h' ? CELL * len - 4 : CELL - 4;
+				const h = dir === 'v' ? CELL * len - 4 : CELL - 4;
+				el.style.width = w + 'px';
+				el.style.height = h + 'px';
+				el.style.background = isHero
+					? 'linear-gradient(135deg, #f1c40f, #e67e22)'
+					: color;
+				el.style.left = (3 + col * CELL + 2) + 'px';
+				el.style.top = (3 + row * CELL + 2) + 'px';
+				el.textContent = emoji;
+				gameArea.appendChild(el);
+
+				const idx = blocks.length;
+				blocks.push({ row, col, len, dir, color, emoji, el, isHero });
+
+				el.addEventListener('pointerdown', e => onPointerDown(e, idx));
+			}
+
+			function positionBlock(b) {
+				b.el.style.left = (3 + b.col * CELL + 2) + 'px';
+				b.el.style.top = (3 + b.row * CELL + 2) + 'px';
+			}
+
+			function occupies(b, r, c) {
+				for (let i = 0; i < b.len; i++) {
+					const br = b.dir === 'v' ? b.row + i : b.row;
+					const bc = b.dir === 'h' ? b.col + i : b.col;
+					if (br === r && bc === c) return true;
+				}
+				return false;
+			}
+
+			function canMove(idx, newRow, newCol) {
+				const b = blocks[idx];
+				for (let i = 0; i < b.len; i++) {
+					const r = b.dir === 'v' ? newRow + i : newRow;
+					const c = b.dir === 'h' ? newCol + i : newCol;
+					if (r < 0 || r >= GRID || c < 0 || c >= GRID) return false;
+					for (let j = 0; j < blocks.length; j++) {
+						if (j === idx) continue;
+						if (occupies(blocks[j], r, c)) return false;
+					}
+				}
+				return true;
+			}
+
+			function onPointerDown(e, idx) {
+				e.preventDefault();
+				dragging = idx;
+				const b = blocks[idx];
+				dragStartX = e.clientX;
+				dragStartY = e.clientY;
+				dragOrigRow = b.row;
+				dragOrigCol = b.col;
+				b.el.classList.add('dragging');
+				b.el.setPointerCapture(e.pointerId);
+
+				b.el.addEventListener('pointermove', onPointerMove);
+				b.el.addEventListener('pointerup', onPointerUp);
+				b.el.addEventListener('pointercancel', onPointerUp);
+			}
+
+			function onPointerMove(e) {
+				if (dragging === null) return;
+				const b = blocks[dragging];
+				const dx = e.clientX - dragStartX;
+				const dy = e.clientY - dragStartY;
+
+				if (b.dir === 'h') {
+					let newCol = dragOrigCol + Math.round(dx / CELL);
+					// Clamp and check collisions step by step
+					newCol = clampMove(dragging, dragOrigRow, dragOrigCol, newCol, 'h');
+					b.col = newCol;
+				} else {
+					let newRow = dragOrigRow + Math.round(dy / CELL);
+					newRow = clampMove(dragging, dragOrigRow, dragOrigCol, newRow, 'v');
+					b.row = newRow;
+				}
+				positionBlock(b);
+			}
+
+			function clampMove(idx, origRow, origCol, target, dir) {
+				const b = blocks[idx];
+				let pos = dir === 'h' ? origCol : origRow;
+				const step = target > pos ? 1 : -1;
+				while (pos !== target) {
+					const next = pos + step;
+					const nr = dir === 'h' ? origRow : next;
+					const nc = dir === 'h' ? next : origCol;
+					if (!canMove(idx, nr, nc)) break;
+					pos = next;
+				}
+				return pos;
+			}
+
+			function onPointerUp(e) {
+				if (dragging === null) return;
+				const b = blocks[dragging];
+				b.el.classList.remove('dragging');
+				b.el.removeEventListener('pointermove', onPointerMove);
+				b.el.removeEventListener('pointerup', onPointerUp);
+				b.el.removeEventListener('pointercancel', onPointerUp);
+
+				if (b.row !== dragOrigRow || b.col !== dragOrigCol) {
+					moves++;
+					moveCount.textContent = moves;
+				}
+
+				dragging = null;
+				checkWin();
+			}
+
+			function checkWin() {
+				const hero = blocks[0];
+				if (hero.dir === 'h' && hero.col + hero.len === GRID) {
+					// WIN!
+					solved.add(currentLevel);
+					buildLevelSelect();
+					setTimeout(() => showWin(), 300);
+				}
+			}
+
+			function showWin() {
+				const isLast = currentLevel === LEVELS.length - 1;
+				const msgs = [
+					"Way to go, Cam!",
+					"You're a puzzle star, Cam!",
+					"Amazing job, Cam!",
+					"You crushed it, Cam!",
+					"Incredible, Cam!",
+					"You're so smart, Cam!",
+					"Brilliant work, Cam!",
+					"Cam, you're unstoppable!",
+				];
+				winTitle.textContent = msgs[currentLevel % msgs.length];
+
+				if (isLast && solved.size === LEVELS.length) {
+					winStars.textContent = '🏆🌟🏆';
+					winMsg.textContent = "You solved EVERY puzzle! You're a puzzle genius, Cam!";
+				} else if (isLast) {
+					winStars.textContent = '🎉🌟🎉';
+					winMsg.textContent = "You beat the last level! Can you go back and solve them all?";
+				} else {
+					const starCount = moves <= 5 ? 3 : moves <= 12 ? 2 : 1;
+					winStars.textContent = '⭐'.repeat(starCount) + '☆'.repeat(3 - starCount);
+					winMsg.textContent = "Solved in " + moves + " move" + (moves !== 1 ? 's' : '') + "!";
+				}
+
+				document.getElementById('btn-next-level').style.display = isLast ? 'none' : '';
+				winOverlay.classList.add('show');
+				launchConfetti();
+			}
+
+			function launchConfetti() {
+				const colors = ['#f7dc6f','#e74c3c','#3498db','#2ecc71','#9b59b6','#e67e22','#1abc9c'];
+				for (let i = 0; i < 60; i++) {
+					const piece = document.createElement('div');
+					piece.className = 'confetti-piece';
+					piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+					piece.style.left = Math.random() * 100 + 'vw';
+					piece.style.top = '-10px';
+					piece.style.width = (6 + Math.random() * 8) + 'px';
+					piece.style.height = (6 + Math.random() * 8) + 'px';
+					piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+					document.body.appendChild(piece);
+
+					const duration = 1500 + Math.random() * 2000;
+					const drift = (Math.random() - 0.5) * 200;
+					const spin = Math.random() * 720;
+					piece.animate([
+						{ transform: 'translateY(0) translateX(0) rotate(0deg)', opacity: 1 },
+						{ transform: `translateY(${window.innerHeight + 20}px) translateX(${drift}px) rotate(${spin}deg)`, opacity: 0 }
+					], { duration, easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)' })
+					.onfinish = () => piece.remove();
+				}
+			}
+
+			function buildLevelSelect() {
+				const el = document.getElementById('level-select');
+				el.innerHTML = '';
+				LEVELS.forEach((lv, i) => {
+					const btn = document.createElement('button');
+					btn.textContent = i + 1;
+					if (i === currentLevel) btn.classList.add('current');
+					if (solved.has(i)) btn.classList.add('solved');
+					btn.addEventListener('click', () => loadLevel(i));
+					el.appendChild(btn);
+				});
+			}
+
+			function loadLevel(idx) {
+				currentLevel = idx;
+				winOverlay.classList.remove('show');
+				calcCellSize();
+				buildGrid(idx);
+				buildLevelSelect();
+			}
+
+			// Button handlers
+			document.getElementById('btn-reset').addEventListener('click', () => loadLevel(currentLevel));
+			document.getElementById('btn-prev').addEventListener('click', () => {
+				if (currentLevel > 0) loadLevel(currentLevel - 1);
+			});
+			document.getElementById('btn-next').addEventListener('click', () => {
+				if (currentLevel < LEVELS.length - 1) loadLevel(currentLevel + 1);
+			});
+			document.getElementById('btn-next-level').addEventListener('click', () => {
+				if (currentLevel < LEVELS.length - 1) loadLevel(currentLevel + 1);
+			});
+			document.getElementById('btn-replay').addEventListener('click', () => loadLevel(currentLevel));
+
+			window.addEventListener('resize', () => {
+				calcCellSize();
+				blocks.forEach(b => {
+					const w = b.dir === 'h' ? CELL * b.len - 4 : CELL - 4;
+					const h = b.dir === 'v' ? CELL * b.len - 4 : CELL - 4;
+					b.el.style.width = w + 'px';
+					b.el.style.height = h + 'px';
+					positionBlock(b);
+				});
+			});
+
+			// Init
+			loadLevel(0);
+		})();
+		</script>
+	</body>
+</html>
